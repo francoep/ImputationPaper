@@ -15,14 +15,14 @@ layer {
         dimension: 23.5
         resolution: 0.500000
         shuffle: false
-        ligmap: "/scr/paul/completelig"
-        recmap: "/scr/paul/completerec"
+        ligmap: "models/completelig"
+        recmap: "models/completerec"
         balanced: false
         has_affinity: true
         has_rmsd: true
         root_folder: "DATA_ROOT"
-        ligmolcache: "/scr/paul/crossdock2020_1.3_lig.molcache2"
-        recmolcache: "/scr/paul/crossdock2020_1.3_rec.molcache2"
+        ligmolcache: "models/crossdock2020_1.3_lig.molcache2"
+        recmolcache: "models/crossdock2020_1.3_rec.molcache2"
     }
   }
   
@@ -55,8 +55,8 @@ layer {
         random_rotation: true
         random_translate: 6
         root_folder: "DATA_ROOT"
-        ligmolcache: "/scr/paul/crossdock2020_1.3_lig.molcache2"
-        recmolcache: "/scr/paul/crossdock2020_1.3_rec.molcache2"        
+        ligmolcache: "models/crossdock2020_1.3_lig.molcache2"
+        recmolcache: "models/crossdock2020_1.3_rec.molcache2"        
     }
 }
 layer {
