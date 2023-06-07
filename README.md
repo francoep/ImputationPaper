@@ -54,7 +54,7 @@ Notably, this is a compliation of all of the jobs we ran, but there are several 
 The evaluation commands are available at results/evaluation_commands.txt.
 
 The way to tell which commands to run is to run the training_commands lines that share an output directory, then run the corresponding evaluations that utilize the same output directory.
-The training and evaluation require a working version of (gnina)[https://github.com/gnina/gnina] and the (train.py)[https://github.com/gnina/scripts] script and (evaluate_cross.py)[https://github.com/gnina/scripts/tree/master/affinity_search] script available (here)[https://github.com/gnina/scripts].
+The training and evaluation require a working version of [gnina](https://github.com/gnina/gnina) and the [train.py](https://github.com/gnina/scripts) script and [evaluate_cross.py](https://github.com/gnina/scripts/tree/master/affinity_search) script available [here](https://github.com/gnina/scripts).
 
 ## Downloading our predictions
 
