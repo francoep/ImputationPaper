@@ -33,8 +33,8 @@
   \@addtofilelist{#1}
   \IfFileExists{#1}{}{\typeout{No file #1.}}
 }
-\setlength\acs@tocentry@height{8.25cm}
-\setlength\acs@tocentry@width{4.45cm}
+\setlength\acs@tocentry@height{4.45cm}
+\setlength\acs@tocentry@width{8.25cm}
 \makeatother
 \newcommand*{\myexternaldocument}[1]{%
     \externaldocument{#1}%
@@ -128,7 +128,7 @@
 
 % This box and the associated title will always be printed on a
 % separate page at the end of the document.
-\includegraphics{figures/TOC_Imp.tiff}
+\includegraphics{figures/TOC_Imp.pdf}
 \end{tocentry}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -247,29 +247,29 @@ That is, even with an imputed binding affinity label, the model is penalized for
 
 \subsection{Experimental Setup}
 For each of the following experiments we train five models, each utilizing a different random seed, on the 3-fold clustered cross-validation splits previously described.
+The general model training schema for each experiment is: 1) Train and evaluate an initial model ignoring any missing labels, 2) Use the trained model and an imputation scheme to impute the missing labels, and 3) Train and evaluate a new model on the imputed data. For the Individual and Individual Ensemble we repeated steps 2-3 until the performance on the test set stopped improving (Figure~\ref{fig:initialImp}).
+We then compared models trained with imputation types that had pocket-ligand groupings one a single round of imputation, and for the best performing model we repeated steps 2-3 one time.
 
 \begin{table}
     \centering
-    \begin{tabular}{c|c|c|c|c}
-         Pose Grouping & Imputation Type & Ensemble & Pocket-Ligand Grouping & Only Low RMSD Poses \\
+    \begin{tabular}{c|c|c}
+         Imputation Type & Pocket-Ligand Grouping & Only Low RMSD Poses \\
          \hline
-        None & Individual & No & -- & No \\
+         Individual & No & No \\
         \hline
-        None & Individual Ensemble & Yes & -- & No \\
+         Individual Ensemble & No & No \\
          \hline
-         \multirow{6}{*}{Aggregated} & Median Ensemble &  Yes & Median & No \\
-          & Median Good Only Ensemble & Yes & Median & Yes \\
-          & Max Ensemble & Yes & Maximum & No \\
-          & Max Good Only Ensemble & Yes & Maximum & Yes \\
-          & Min Ensemble & Yes & Minimum & No \\
-          & Min Good Only Ensemble & Yes & Minimum & Yes \\
+         Median Ensemble & Yes & No \\
+         Median Good Only Ensemble & Yes & Yes \\
+         Max Ensemble & Yes & No \\
+         Max Good Only Ensemble & Yes & Yes \\
+         Min Ensemble & Yes & No \\
+         Min Good Only Ensemble & Yes & Yes \\
     \end{tabular}
-    \caption{Experimental setups. This table shows how a given experimental approach imputes a given Pocket-Ligand complex. This ranges from each pose being assigned an imputed label from a singular model (First), each pose being assigned the ensemble mean of five models (Second), or each Pocket-Ligand pair being assigned a singular imputed label of the ensemble mean of five models (Third). The Third experiment measures differences by selecting the imputation label by median, maximum, or minimum of either all or only the low RMSD poses.}
+    \caption{This table shows how a given experimental approach imputes a given pocket-ligand complex. The imputation types marked with ``Individual'' create an imputed binding affinity label for every pose. The other imputation types select a single imputed label for every pose for a given pocket-ligand complex. The label selection is done by taking the median, maximum, or minimum of the imputed labels for either all poses or only the low RMSD poses of the pocket-ligand complex.}
     \label{tab:expApproach}
 \end{table}
 
-The general model training schema for each experiment is: 1) Train and evaluate an initial model ignoring any missing labels, 2) Use the trained model and an imputation scheme to impute the missing labels, and 3) Train and evaluate a new model on the imputed data. For the Individual and Individual Ensemble we repeated steps 2-3 until the performance on the test set stopped improving (Figure~\ref{fig:initialImp}).
-We compared models trained with imputation types with aggregated pose groupings one a single round of imputation, and for the best performing model we repeated steps 2-3 one time.
 We investigated several imputation schemes in order to determine their effect on model binding affinity prediction performance.
 First, we utilized the simplest imputation type: treating each binding pose as a different example and simply utilizing the predictions of a trained model independently (Individual row in Table~\ref{tab:expApproach}).
 That is, there was no ensemble between the different seeds on the imputation for the missing data.
@@ -280,11 +280,13 @@ This allows for the same training set to be utilized for each seed during traini
 Notably, only the imputed binding affinities have a pose-specific label for the binding affinity, unlike the rest of the training data.
 It is unclear whether this is desirable or not, so we also investigated a third imputation type.
 
-In the third imputation type, we stored the predicted label of every pose for each pocket-ligand complex (rows with the aggregated pose grouping in Table~\ref{tab:expApproach}).
-We then took as our imputation label the max, median, or minimum of these predicted values for every pose in said pocket-ligand complex.
+In the remaining imputation types, we stored the predicted label of every pose for each pocket-ligand complex (rows with pocket-ligand grouping in Table~\ref{tab:expApproach}).
+We then took as our imputation label for a single model either the max, median, or minimum of these predicted values for every pose in said pocket-ligand complex.
+The resulting labels from the five models were then averaged to provide the final imputation label for a given pocket-ligand complex.
 In contrast to the second imputation scheme, this approach results in a single value being utilized for every pose of a ligand, just as with experimental data.
 
-A potential flaw with the third imputation approach is that we also include the predicted binding affinity for poses which we know are not in the correct binding orientation when calculating the aggregate statistics.  For example, the model is expected to predict low binding affinities for a bad (high RMSD) poses, but these predictions will contribute to the median calculation.
+A potential flaw with the previously described imputation approach is that we also include the predicted binding affinity for poses which we know are not in the correct binding orientation when calculating the aggregate statistics.
+For example, the model is expected to predict low binding affinities for a bad (high RMSD) poses, but these predictions will contribute to the median calculation.
 This could cause potential confusion during model training as poor quality poses  comprise 96.3\% of the dataset.
 Thus we also investigate modifying approach three to only include predictions from poses that are labeled good (less than 2{\AA} RMSD from the native crystal pose).
 
@@ -297,8 +299,6 @@ Namely, for each pocket-ligand pair we select a singular pose by selecting the p
 We then calculate the Pearson's $R$ and the root mean squared error (RMSE) between the candidate poses binding affinity labels and the predictions from our model; we only evaluate the molecules in the test set that have a binding affinity label.
 We additionally evaluate the area under the receiver operating characteristic curve (AUC), and the fraction of times that the top-ranked binding pose is less than 2{\AA} RMSD to the native crystal pose (Top1) to serve as measures of our model's ability to use the imputed binding affinity data to improve its performance at the orthogonal task of distinguishing bad and good poses.
 
-%TODO -- make a series of figures for each of the expiermental setups & referemce them to these sections
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Results
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -310,6 +310,7 @@ Lastly, we provide evidence that utilizing a roughly equal balance of imputed tr
 
 \subsection{Imputation improves model performance}
 In our first experiment, we sought to determine if imputing missing labels improves our CNN's ability to predict receptor-ligand binding affinity.
+For this experiment we utilized the Individual and Individual Ensemble imputation types.
 Figure~\ref{fig:initialImp} shows that utilizing imputed labels indeed improves the model's performance on binding affinity prediction, with two iterations of training+imputing maximizing performance gains.
 Additionally, even though our binding pose classification data remains unchanged, we note that providing the model with imputed binding affinity labels also results in a small improvement on the binding pose classification task.
 
@@ -361,16 +362,16 @@ We also investigated the effect of this calculation using all possible poses for
 We then utilized the ensemble mean of five differently seeded models as our imputed binding affinity label for a given receptor-ligand complex and trained five new models with different seeds on the new dataset.
 The results for a single iteration of imputation and evaluation are shown in Figure~\ref{fig:compareImp}.
 
-All imputation types improved the model's performance on binding affinity Pearson's $R$, but only one of the new imputation methods (an ensemble mean of the median predicted binding affinity from good poses only) improved the predicted binding affinity RMSE.
+All imputation types improved the model's performance on binding affinity Pearson's $R$, but only the Median Good Only Ensemble improved the predicted binding affinity RMSE.
 This imputation type also had the best performance gain on the binding affinity regression task when compared to training without imputation.
-As such, we performed another iteration of imputation training with the ensemble mean of the median predicted binding affinities of good poses label generation, similar to the setup from the prior experiment.
+As such, we performed another iteration of imputation training, similar to the setup from the prior experiment.
 The results of this extra round of imputation are shown in Figure~\ref{fig:medGOEnsOverall}.
 Again, we observe additional performance gain on the second round of imputation and that the gain is minimal compared to the initial gain.
 Due to this, and the results of Figure~\ref{fig:initialImp}, we performed no additional rounds of imputation.
 
-We note that while the ensemble mean of the median predicted binding affinities of good poses provided the best results for the binding affinity prediction task, it performed relatively poorly on the binding pose classification task (Figure~\ref{fig:compareImp}).
-The ensemble mean of each individual pose performed the best at having the top-ranked pose be low RMSD (Top1) and was the only approach to achieve a statistically significant improvement between the models trained with imputation and those without (Table~\ref{tab:ImpTypeSignificance}).
-Both imputation approaches that generated an imputed binding affinity label for every pose resulted in the best performance gain for AUC.
+We note that while the Median Good Only Ensemble provided the best results for the binding affinity prediction task, it performed relatively poorly on the binding pose classification task (Figure~\ref{fig:compareImp}).
+The Individual Ensemble performed the best at having the top-ranked pose be low RMSD (Top1) and was the only approach to achieve a statistically significant improvement between the models trained with imputation and those without (Table~\ref{tab:ImpTypeSignificance}).
+Both the Individual and Individual Ensemble imputation types resulted in the best performance gain for AUC.
 
 \begin{figure}[tbph]
     \centering
@@ -427,7 +428,7 @@ Both imputation approaches that generated an imputed binding affinity label for 
         \includegraphics[width=\linewidth]{figures/MedGOEnsAUC.pdf}
         \caption{Binding pose AUC improves when utilizing an ensemble of the median predicted affinity for imputation. Higher is better.}
     \end{subfigure}
-    \caption{Performance metrics of our best imputation approach, taking the ensemble mean of the median predicted binding affinity for each pocket-ligand complex good pose, for binding affinity regression. The 0th point on the line is the model results after training on the original dataset. We then used that model to generate the imputed labels, and utilized them to train the model for the 1st data point. Said model was then used to generate the imputed labels for the 2nd datapoint's model's training. For each point five models with different seeds were trained from scratch. The shaded area is the 95\% confidence interval of the mean calculated via bootstrapping in \textit{seaborn}.}
+    \caption{Performance metrics of our best imputation approach, taking the ensemble mean of the median predicted binding affinity for each pocket-ligand complex good pose, for binding affinity regression. The 0th point on the line is the model results after training on the original dataset. We then used that model to generate the imputed labels, and utilized them to train the model for the 1st data point. Said model was then used to generate the imputed labels for the second datapoint's model's training. For each point five models with different seeds were trained from scratch. The shaded area is the 95\% confidence interval of the mean calculated via bootstrapping in \textit{seaborn}.}
     \label{fig:medGOEnsOverall}
 \end{figure}
 
@@ -450,9 +451,9 @@ Both imputation approaches that generated an imputed binding affinity label for 
 \end{table}
 
 \subsection{Balancing imputed and known labels maximizes model learning}
-The majority of our dataset, about 60\%, is missing a binding affinity label.
+The majority of CrossDocked2020, about 60\%, is missing a binding affinity label.
 We theorize that it is potentially not beneficial to have most of the loss affecting the model's weights come from imputed labels.
-Thus, we characterized the effect of gradually adding more imputed labels to the training set for the ensemble mean of the median predicted binding affinities of good poses label generation imputation procedure.
+Thus, we characterized the effect of gradually adding more imputed labels to the training set for the Median Good Only Ensemble imputation type.
 In order to do this we randomly selected 20\% of our imputed labels to be added to the training set, trained five new models with different seeds on a new version of the dataset with these extra imputed labels, and measured their performance.
 We then repeated this with another randomly selected 20\%, making 40\% total, then again for 60\% total, and one last time for 80\% total.
 The results of this experiment are shown in Figure~\ref{fig:medGOEnsAdding}.
@@ -498,33 +499,33 @@ While not precisely tested here, this result implies that maximal improvement is
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}
 We have demonstrated that imputed binding affinity labels improve model performance at predicting receptor-ligand binding affinity for the CrossDocked2020 dataset.
-Additionally, due to our model's shared weights for the pose classification and binding affinity regression tasks, we also observe a small beneficial effect of including imputing binding affinity labels during training on pose classification.
-We also investigated several imputation approaches utilizing only our CNN model, and suggest some best practices on imputation going forward: ensemble-based approaches to ML-generated imputation labels are better (Figure~\ref{fig:initialImp}), two rounds of imputation generation achieves maximal improvement (Figures~\ref{fig:initialImp,fig:medGOEnsOverall}), taking the median predicted affinity of only the good poses is the best approach to generating imputed binding affinity labels (Figure~\ref{fig:compareImp}), and a roughly equal number of imputed labels and known labels achieves optimal performance gains (Figure~\ref{fig:medGOEnsAdding}).
+Additionally, due to our model's shared weights for the pose classification and binding affinity regression tasks, we also observe that including imputing binding affinity labels during training has a small beneficial effect on pose classification.
+We also investigated several imputation approaches utilizing only our CNN model, and suggest some best practices on imputation going forward: ensemble-based approaches to ML-generated imputation labels are better (Figure~\ref{fig:initialImp}), two rounds of imputation generation achieves maximal improvement (Figures~\ref{fig:initialImp},\ref{fig:medGOEnsOverall}), Median Good Only Ensemble is the best approach to generating imputed binding affinity labels (Figure~\ref{fig:compareImp}), and a roughly equal number of imputed labels and known labels achieves optimal performance gains (Figure~\ref{fig:medGOEnsAdding}).
 
 Notably, we only investigated utilizing a model trained with the CrossDocked2020 data for our imputation.
-This is not representative of chemical space, and could just be further reinforcing the biases sample of CrossDocked2020 during the imputation process.
+This is not representative of chemical space, and could just be further reinforcing the biases of CrossDocked2020 during the imputation process.
 A potential solution to this problem would be to utilize a different model, trained on a different, larger dataset (e.g. ChEMBL\cite{Chembl}), which could provide more useful imputed binding affinity labels.
-There are several initial challenges to such an approach: 1) selecting a different training dataset without having leakage into CrossDocked2020, 2) selecting an input representation and new model architecture for this task.
+There are several initial challenges to such an approach: 1) selecting a different training dataset without having leakage into CrossDocked2020, 2) selecting an appropriate input representation that works for both the new dataset and CrossDocked2020, and 3) selecting a new model architecture for this task.
 We leave such a study to future work.
 
 Our first set of experiments show that imputing a binding affinity label for every pose (Individual and Individual Ensemble) has a small, but beneficial effect on the binding affinity prediction task (Figure~\ref{fig:initialImp}).
 We then demonstrate that selecting a single imputation label for the entire pocket-ligand pair performs better than our Individual Ensemble for the binding affinity prediction task's Pearson correlation (Figure~\ref{fig:compareImp}b).
-However, for the binding affinity prediction task RMSE, only the Median Good Only Ensemble method out performed the Individual and Individual Ensemble methods (Figure~\ref{fig:compareImp}a).
+However, for the binding affinity prediction task RMSE, only the Median Good Only Ensemble imputation type out performed the Individual and Individual Ensemble methods (Figure~\ref{fig:compareImp}a).
 Additionally, we only investigated some simple approaches to selecting our imputed binding affinity label (minimum, maximum, median) when selecting a single label for a pocket-ligand complex.
 It is entirely possible that a more sophisticated approach, such as something related to SICE\cite{SICE} or maximum likelihood estimation, could provide better imputation labels.
 However, these approaches would require a model that also outputs its confidence in its predictions, which is outside the scope of our current Default2018 architecture.
 Again, we leave such a study to future work.
 
-Additionally, we observed that imputing a unique binding affinity for each pose resulted in a small, but statistically significant improvement on the pose classification task (Figure~\ref{fig:compareImp}, Table~\ref{tab:ImpTypeSignificance}).
+Additionally, we observed that imputing a unique binding affinity for each pose (Individual and Individual Ensemble) resulted in a small, but statistically significant improvement on the pose classification task (Figure~\ref{fig:compareImp}, Table~\ref{tab:ImpTypeSignificance}).
 This is not necessarily surprising due to our model's training procedure.
 During training, we backpropagate the losses through the output layers and into the CNN.
-By including imputed binding affinities (which are different for every pose) we allow the binding affinity hinge loss to affect all of the poses in the training set.
+By including imputed binding affinities that are different for every pose we allow the binding affinity hinge loss to affect all of the poses in the training set.
+Previously, this loss was only applied to complexes with a known binding affinity.
 With the different binding affinity labels for each of the poses, we are also including some extra binding affinity information to affect the CNN, which generates the input for both output layers.
 This can allow the CNN to gain some additional information to help in its pose-classification task.
 
-
 We have demonstrated that imputing labels for receptor-ligand binding affinity prediction can improve CNN-based ML models at this regression task.
-Our best performing imputation technique, taking the ensemble mean of the median predicted affinity of the low RMSD poses for a given pocket-ligand complex, achieved a small but statistically significant improvement on the RMSE and Pearson's $R$ between the true binding affinities and the predicted binding affinities of CrossDocked2020v1.3 (Figure~\ref{fig:compareImp} and Table~\ref{tab:ImpTypeSignificance}).
+Our best performing imputation technique, the Median Good Only Ensemble, achieved a small but statistically significant improvement on the RMSE and Pearson's $R$ between the true binding affinities and the predicted binding affinities of CrossDocked2020v1.3 (Figure~\ref{fig:compareImp} and Table~\ref{tab:ImpTypeSignificance}).
 We also provide some initial best practices that may apply to future work: utilizing an ensemble of predictions over only the poses that are known to be good, utilizing a roughly balanced amount of known labels with imputed labels for training, and performing our training-imputation cycle twice for maximal model performance.
 The code, data splits, and imputation labels utilized in this paper are freely available at \url{https://github.com/francoep/ImputationPaper}.
 
