@@ -12,6 +12,8 @@ wget http://bits.csb.pitt.edu/files/crossdock2020/crossdock2020_1.3_lig.molcache
 wget http://bits.csb.pitt.edu/files/crossdock2020/crossdock2020_1.3_rec.molcache2
 wget http://bits.csb.pitt.edu/files/imputation_paper/roche_set_crystal_lig.molcache2
 wget http://bits.csb.pitt.edu/files/imputation_paper/roche_set_crystal_rec.molcache2
+wget http://bits.csb.pitt.edu/files/imputation_paper/roche_set_docked_lig.molcache2
+wget http://bits.csb.pitt.edu/files/imputation_paper/roche_set_docked_rec.molcache2
 mv *.molcache2 models
 ```
 
@@ -54,7 +56,7 @@ roche_set_crystal.types                        -- Types files for the Roche data
 
 ## Generating the Roche dataset
 
-We provide a processed version of the Roche dataset, which includes the original data, our gninatypes files used for libmolgrid, and the processed receptor (where we removed the water present).
+We provide a processed version of the Roche dataset, which includes the original data, our gninatypes files used for libmolgrid, and the processed receptor (where we removed the water present), and the gnina docked poses and corresponding gninatypes files.
 You can download and extract all of these files:
 
 ```
