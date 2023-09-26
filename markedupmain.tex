@@ -162,8 +162,8 @@ We made the assumption that ligands will bind to similar receptors in order to g
 This increased the number of docked binding poses from $\sim$200,000 generated when docking the PDBbind general set to $\sim$22.5 million poses in CrossDocked2020\cite{crossdocked2020}. This expanded dataset was used to train the convolutional neural network (CNN) models for protein-ligand scoring\cite{ragoza2017protein} that are used by the GNINA docking software.\cite{mcnutt2021gnina}
 
 While CrossDocked2020 massively expands the amount of pose data available for training, a shortcoming of this approach is that it does not expand the amount of binding affinity data.
-The binding affinity between a protein and a ligand is a measure of how strongly the two molecules interact, and is a common modeling task.
-There have been several different approaches to utilizing ML and other modeling techniques for binding affinity regression.\cite{roccoBAreview,zhao2022brief,gu2023protein,crossdocked2020,kdeep,onionnet,pafnuncy,bapa,fusionAff,cang2018representability,NNscore, RFscore,DLscore}
+\textbf{The binding affinity between a protein and a ligand is a measure of how strongly the two molecules interact, and is a common modeling task.
+There have been several different approaches to utilizing ML and other modeling techniques for binding affinity regression.\cite{roccoBAreview,zhao2022brief,gu2023protein,crossdocked2020,kdeep,onionnet,pafnuncy,bapa,fusionAff,cang2018representability,NNscore, RFscore,DLscore}}
 CrossDocked2020 sources its binding affinity labels from the PDBbind general set, but all of its possible receptor-ligand pairs from Pocketome.\cite{pocketome}
 This results in the existence of ligands in CrossDocked2020 that do not have a binding affinity label, as they are not included in the PDBbind general set.
 The group of unlabeled ligands is the majority of CrossDocked2020, since only $\sim$40\% of CrossDocked2020 has a binding affinity label.
@@ -171,7 +171,7 @@ For binding affinity predictions, models trained on CrossDocked2020 observe the 
 In this work, we investigate the effect of various imputation strategies for the missing binding affinity labels on model performance.
 
 Imputation is the process of replacing missing data with estimated values.\cite{surveyReview1, review2}
-This is especially attractive for ML models as, if the imputed labels are readily available, then there is negligible impact on training time and compute resources to train the final model.
+\textbf{This is especially attractive for ML models as, if the imputed labels are readily available, then there is negligible impact on training time and compute resources to train the final model.}
 There are several approaches to imputing missing data.
 The simplest is to delete or ignore data points with missing features (i.e., not do imputation).
 This is the approach previously taken when training models on the CrossDocked2020 data.\cite{crossdocked2020}  
@@ -241,8 +241,8 @@ We then scored the provided pose of the molecule, and each of the docked poses w
 Consistent with our prior work\cite{crossdocked2020}, models were trained using our custom fork of the Caffe deep learning framework \cite{jia2014caffe} with \texttt{libmolgrid} integration \cite{sunseri2019libmolgrid} using the \texttt{train.py} script available at \url{https://github.com/gnina/scripts}.
 Training examples were randomly shuffled and a batch size of 50 was used.
 Batches were balanced with respect to class labels (low RMSD vs high RMSD poses) and examples were stratified with respect to the receptor so that targets are sampled uniformly during training.
-This means that during training, the model will ``see'' an equivalent number of low RMSD poses and high RMSD poses for each binding pocket, and each binding pocket is sampled evenly.
-This is achieved by upsampling the data for whatever is lower (e.g. the number of low RMSD poses are upsampled so that during training the model is trained on an equivalent number of low and high RMSD poses, even though high RMSD poses make up 96.3\% of the dataset).
+\textbf{This means that during training, the model will ``see'' an equivalent number of low RMSD poses and high RMSD poses for each binding pocket, and each binding pocket is sampled evenly.
+This is achieved by upsampling the data for whatever is lower (e.g. the number of low RMSD poses are upsampled so that during training the model is trained on an equivalent number of low and high RMSD poses, even though high RMSD poses make up 96.3\% of the dataset).}
 Structures were randomly rotated and translated (up to 6{\AA}).
 We utilized the stochastic gradient descent (SGD) optimizer with an initial learning rate of 0.01 and momentum of 0.9 with weight decay of 0.001.
 
@@ -300,14 +300,14 @@ We then took as our imputation label for a single model either the max, median, 
 The resulting labels from the five models were then averaged to provide the final imputation label for a given pocket-ligand complex.
 In contrast to the second imputation scheme, this approach results in a single value being utilized for every pose of a ligand, just as with experimental data.
 
-A potential flaw with the previously described imputation approach is that we also include the predicted binding affinity for poses which we know are not in the correct binding orientation when calculating the aggregate statistics.
+\textbf{A potential flaw with the previously described imputation approach is that we also include the predicted binding affinity for poses which we know are not in the correct binding orientation when calculating the aggregate statistics.
 For example, there are many more high RMSD poses than low RMSD poses for every pocket:ligand pair.
 Additionally, we know that, due to the hinge loss when training, our model tends to predict lower binding affinities for high RMSD poses. \cite{crossdocked2020}
-Thus, when calculating the minimum and median aggregate statistics for imputation, we are artificially lowering the calculated number through the inclusion of many poses that are of low quality.
+Thus, when calculating the minimum and median aggregate statistics for imputation, we are artificially lowering the calculated number through the inclusion of many poses that are of low quality.}
 %For example, the model is expected to predict low binding affinities for a bad (high RMSD) poses, but these predictions will contribute to the median calculation.
 %This could cause potential confusion during model training as poor quality poses  comprise 96.3\% of the dataset.
 %Thus we also investigate modifying approach three to only include predictions from poses that are labeled good (less than 2{\AA} RMSD from the native crystal pose).
-In order to alleviate this problem, we also investigate modifying our approach to include only predictions from the low RMSD poses (less than 2{\AA} from the crystal pose).
+\textbf{In order to alleviate this problem, we also investigate modifying our approach to include only predictions from the low RMSD poses (less than 2{\AA} from the crystal pose).}
 
 Lastly, we characterize how much imputed data is necessary to achieve the maximal performance gain for our best performing imputation type.
 We evaluate randomly adding increments of 20 percent of the imputed binding labels to the training data of the model, i.e., training with no imputed labels, 20, 40, 60, 80, or 100 percent of the imputed labels.
@@ -315,7 +315,7 @@ This allows us to characterize the effect of adding various levels of imputed da
 
 To compare these experiments we adopt the same testing criteria and methods described in the initial CrossDocked2020 paper\cite{crossdocked2020}.
 Namely, for each pocket-ligand pair we select a singular pose by selecting the pose with the highest predicted pose score to be our candidate. 
-We then calculate the Pearson's $R$, the root mean squared error (RMSE), and coefficient of determination between the candidate poses binding affinity labels and the predictions from our model; we only evaluate the molecules in the test set that have a binding affinity label.
+We then calculate the Pearson's $R$, root mean squared error (RMSE),\textbf{ and coefficient of determination }between the candidate poses binding affinity labels and the predictions from our model; we only evaluate the molecules in the test set that have a binding affinity label.
 We additionally evaluate the area under the receiver operating characteristic curve (AUC), and the fraction of times that the top-ranked binding pose is less than 2{\AA} RMSD to the native crystal pose (Top1) to serve as measures of our model's ability to use the imputed binding affinity data to improve its performance at the orthogonal task of distinguishing bad and good poses.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -338,12 +338,12 @@ For this experiment, each pose is also getting an independent binding affinity i
 During training, the loss is a combination of the affinity loss and the classification loss.
 The extra imputed binding affinity labels can supply more data to the overall loss function as now each pose with have both the affinity loss and the classification loss.
 
-However, it is unclear if utilizing different imputations for every pose is the best approach for performance on the binding affinity regression task.
+\textbf{However, it is unclear if utilizing different imputations for every pose is the best approach for performance on the binding affinity regression task.
 When training with experimental binding affinities, each pose is labeled with the same binding affinity label.
 This is not true of the imputed labels in this experiment, as we impute a different binding affinity label for each docked pose of the complex.
 This introduces an additional source of information in the training data, as the complexes with an imputed binding affinity label have additional noise as compared to the known labels.
 If we trust our model's ability to predict binding affinity accurately, then it does not make sense to hamper our model with extra noise when training on the imputed labels.
-On the other hand, this extra source of information could be beneficial to the final trained model's performance.
+On the other hand, this extra source of information could be beneficial to the final trained model's performance.}
 
 \begin{figure}[tbph]
     \centering
@@ -568,6 +568,7 @@ We also note that our performance gains, while statistically significant, were s
 However, unlike approaches that increases model complexity in order to achieve similar improvements in performance,\cite{crossdocked2020,bapa,fusionAff,pafnuncy,kdeep,onionnet} imputing missing labels is an orthogonal technique to model architecture optimization and imposes no increase in model complexity or run-time performance. 
 As long as including imputed labels does not worsen the predictive performance of the model, there is no downside to the end user. 
 Furthermore, if imputed labels are already available, or if they can be generated dynamically during training (as opposed to the iterative processes described here), there is little overhead to including them at training time.
+
 
 We have demonstrated that imputing labels for receptor-ligand binding affinity prediction can improve CNN-based ML models at this regression task.
 Our best performing imputation technique, the Median Good Only Ensemble, achieved a small but statistically significant improvement on the RMSE and Pearson's $R$ between the true binding affinities and the predicted binding affinities of CrossDocked2020v1.3 (Figure~\ref{fig:compareImp} and Table~\ref{tab:ImpTypeSignificance}).
