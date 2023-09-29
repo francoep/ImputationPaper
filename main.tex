@@ -281,7 +281,7 @@ We then compared models trained with imputation types that had pocket-ligand gro
          Min Ensemble & Yes & No \\
          Min Good Only Ensemble & Yes & Yes \\
     \end{tabular}
-    \caption{This table shows how a given experimental approach imputes a given pocket-ligand complex. The imputation types marked with ``Individual'' create an imputed binding affinity label for every pose. The other imputation types select a single imputed label for every pose for a given pocket-ligand complex. The label selection is done by taking the median, maximum, or minimum of the imputed labels for either all poses or only the low RMSD poses of the pocket-ligand complex.}
+    \caption{How a given experimental approach imputes a given pocket-ligand complex. The imputation types marked with ``Individual'' create an imputed binding affinity label for every pose. The other imputation types select a single imputed label for every pose for a given pocket-ligand complex. The label selection is done by taking the median, maximum, or minimum of the imputed labels for either all poses or only the low RMSD poses of the pocket-ligand complex.}
     \label{tab:expApproach}
 \end{table}
 
@@ -301,7 +301,7 @@ The resulting labels from the five models were then averaged to provide the fina
 In contrast to the second imputation scheme, this approach results in a single value being utilized for every pose of a ligand, just as with experimental data.
 
 A potential flaw with the previously described imputation approach is that we also include the predicted binding affinity for poses which we know are not in the correct binding orientation when calculating the aggregate statistics.
-For example, there are many more high RMSD poses than low RMSD poses for every pocket:ligand pair.
+For example, there are many more high RMSD poses than low RMSD poses for every pocket-ligand pair.
 Additionally, we know that, due to the hinge loss when training, our model tends to predict lower binding affinities for high RMSD poses. \cite{crossdocked2020}
 Thus, when calculating the minimum and median aggregate statistics for imputation, we are artificially lowering the calculated number through the inclusion of many poses that are of low quality.
 %For example, the model is expected to predict low binding affinities for a bad (high RMSD) poses, but these predictions will contribute to the median calculation.
@@ -331,7 +331,7 @@ Lastly, we provide evidence that utilizing a roughly equal balance of imputed tr
 In our first experiment, we sought to determine if imputing missing labels improves our CNN's ability to predict receptor-ligand binding affinity.
 For this experiment we utilized the Individual and Individual Ensemble imputation types.
 Figure~\ref{fig:initialImp} shows that utilizing imputed labels indeed improves the model's performance on binding affinity prediction, with two iterations of training+imputing maximizing performance gains.
-Additionally, even though our binding pose classification data remains unchanged, we note that providing the model with imputed binding affinity labels also results in a small improvement on the binding pose classification task.
+Additionally, even though our binding pose classification data remains unchanged, we note that providing the model with imputed binding affinity labels also results in a small improvement on the binding pose classification task (Figure~\ref{fig:SuppinitialImp}).
 
 In our prior work we demonstrated that our binding affinity predictions were pose dependent, in part due to the Def2018 architecture sharing weights for the binding pose classification and binding affinity regression task\cite{crossdocked2020}.
 For this experiment, each pose is also getting an independent binding affinity imputation (e.g. if a particular receptor-ligand complex has 20 poses, there will be 20 imputed affinities).
@@ -397,7 +397,7 @@ Both the Individual and Individual Ensemble imputation types resulted in the bes
         \caption{Change in binding affinity Pearson's $R$ relative to no imputation with a variety of imputation styles. Higher is better.}
     \end{subfigure}
 
-    \caption{Comparing different binding affinity imputation styles. The performance metrics for five models with different seeds trained with each imputation style were subtracted from the mean performance of training without imputation. The shaded area is the 95\% confidence interval of this described value calculated via bootstrapping in \textit{seaborn}. For each plot, a bar corresponds to a singular imputation style. The first two styles, Individual and Individual\_Ensemble are the same that are used in Figure~\ref{fig:initialImp}. For the rest of the styles, we select one number for each pocket-ligand pair, either by the median (Med), maximum (Max), or minimum (Min). Styles marked with \textit{\_Ens} are ensembles, where the mean across the five models is utilized. Styles marked with \textit{\_GO} only utilize the imputations from poses that are labeled good. The Min\_Ens results were omitted, due to performing so poorly that they re-scaled the plots (Delta RMSE 1.674, Delta R -0.157, Delta Top1 -0.0175, and Delta AUC 0.00219). The Student's T test for each of these values is reported in Table~\ref{tab:ImpTypeSignificance}. A dashed grey line is extended from the mean result of training without imputed labels for easier comparisons.}
+    \caption{Comparing different binding affinity imputation styles. The performance metrics for five models with different seeds trained with each imputation style were subtracted from the mean performance of training without imputation. The shaded area is the 95\% confidence interval of this described value calculated via bootstrapping in \textit{seaborn}. For each plot, a bar corresponds to a singular imputation style. The first two styles, Individual and Individual\_Ensemble are the same that are used in Figure~\ref{fig:initialImp}. For the rest of the styles, we select one number for each pocket-ligand pair, either by the median (Med), maximum (Max), or minimum (Min). We then either utilized the Med/Max/Min of all poses, or only the poses labeled good. The Min Ensemble results were omitted, due to performing so poorly that they re-scaled the plots (Delta RMSE 1.674, Delta R -0.157). The Student's T test for each of these values is reported in Table~\ref{tab:ImpTypeSignificance}. A dashed grey line is extended from the mean result of training without imputed labels for easier comparisons.}
     \label{fig:compareImp}
 \end{figure}
 
@@ -564,7 +564,7 @@ Previously, this loss was only applied to complexes with a known binding affinit
 With the different binding affinity labels for each of the poses, we are also including some extra binding affinity information to affect the CNN, which generates the input for both output layers.
 This can allow the CNN to gain some additional information to help in its pose-classification task.
 
-We also note that our performance gains, while statistically significant, were small (e.g. on the order of an improvement of 0.01 on the binding affinity RMSE and Pearson R), and so a reasonable perspective is that it is not worth doing. 
+We also note that our performance gains, while statistically significant for most, but not all, metrics (Table~\ref{tab:ImpTypeSignificance} and \ref{tab:SuppImpTypeSignificance}), were small (e.g. on the order of an improvement of 0.01 on the binding affinity RMSE and Pearson R), and so a reasonable perspective is that it is not worth doing. 
 However, unlike approaches that increases model complexity in order to achieve similar improvements in performance,\cite{crossdocked2020,bapa,fusionAff,pafnuncy,kdeep,onionnet} imputing missing labels is an orthogonal technique to model architecture optimization and imposes no increase in model complexity or run-time performance. 
 As long as including imputed labels does not worsen the predictive performance of the model, there is no downside to the end user. 
 Furthermore, if imputed labels are already available, or if they can be generated dynamically during training (as opposed to the iterative processes described here), there is little overhead to including them at training time.
