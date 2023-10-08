@@ -73,7 +73,7 @@ The evaluation commands are available at results/evaluation_commands.txt.
 The way to tell which commands to run is to run the training_commands lines that share an output directory, then run the corresponding evaluations that utilize the same output directory.
 The training and evaluation require a working version of [gnina](https://github.com/gnina/gnina) and the [train.py](https://github.com/gnina/scripts) script and [evaluate_cross.py](https://github.com/gnina/scripts/tree/master/affinity_search) script available [here](https://github.com/gnina/scripts).
 
-## Downloading our predictions
+## Downloading our training set predictions
 
 The prediction files resulting from the training and evaluations are massive.
 We provide our files to compare with what you can generate.
@@ -83,6 +83,18 @@ mkdir paper_predictions
 cd paper_predictions
 wget http://bits.csb.pitt.edu/files/imputation_paper/trainingset_predictions.tar.gz
 tar -xzf trainingset_predictions.tar.gz
+```
+
+## Downloading our test set predictions
+
+We also provide all of our test set predictions.
+These were utilized to calculate coefficient of determinations.
+These test set predictions were utilized with the [results/calc_r2_scores.ipynb](https://github.com/francoep/ImputationPaper/blob/master/results/calc_r2_scores.ipynb) file to calculate the coefficients of determination for each model trained.
+
+```
+cd results
+wget http://bits.csb.pitt.edu/files/imputation_paper/testset_predictions.tar.gz
+tar -xzf testset_predictions.tar.gz
 ```
 
 ## Generating the figures utilized in the paper.
