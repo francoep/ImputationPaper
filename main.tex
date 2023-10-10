@@ -17,6 +17,8 @@
 %% extensions are not currently available on the ACS conversion
 %% servers.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setkeys{acs}{maxauthors = 10}
+\setkeys{acs}{etalmode=truncate}
 \usepackage[version=3]{mhchem} % Formula subscripts using \ce{}
 \usepackage{subcaption}
 \usepackage{array}
@@ -57,7 +59,7 @@
 %% when typesetting).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand*\mycommand[1]{\texttt{\emph{#1}}}
-
+\renewcommand\tocentryname{For Table of Contents Only}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Meta-data block
@@ -140,6 +142,7 @@ The success of machine learning is, in part, due to a large volume of data avail
 However, the amount of training data for structure based molecular property prediction remains limited.
 The previously described CrossDocked2020 dataset expanded the available training data for binding pose classification in a molecular docking setting, but did not address expanding the amount of receptor-ligand binding affinity data.
 We present experiments demonstrating that imputing binding affinity labels for complexes without experimentally determined binding affinities is a viable approach to expanding training data for structure-based models of receptor-ligand binding affinity.
+In particular, we demonstrate that utilizing imputed labels from taken from a convolutional neural network trained only on the affinity data present in CrossDocked2020 results in a small improvement on binding affinity regression performance, despite the additional sources of noise that such imputed labels add to the training data.
 The code, data splits, and imputation labels utilized in this paper are freely available at \url{https://github.com/francoep/ImputationPaper}.
 \end{abstract}
 
@@ -603,7 +606,9 @@ This work is supported by R35GM140753 from the National Institute of General Med
 %This will usually read something like: ``Experimental procedures and
 %characterization data for all new compounds. The class will
 %automatically add a sentence pointing to the information on-line:
-Supporting Information Available: Supplementary Figures (\ref{fig:SuppinitialImp} - \ref{fig:SuppmedGOEnsAdding}) and Table \ref{tab:SuppImpTypeSignificance}
+Supplementary Table \ref{tab:SuppImpTypeSignificance} contains the student's T-test p-values for the coefficient of determination, AUC, and Top1 analysis of the difference between 0 and 1 round of imputation for each Imputation Type.
+Supplementary Figures \ref{fig:SuppinitialImp} - \ref{fig:SuppmedGOEnsAdding} follow the same experimental setup as Figures \ref{fig:initialImp} - \ref{fig:medGOEnsAdding}, but analyze the binding affinity coefficient of determination ($R2$) and the binding pose AUC and Top1.
+
 \end{suppinfo}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
