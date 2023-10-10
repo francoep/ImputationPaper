@@ -90,6 +90,7 @@ tar -xzf trainingset_predictions.tar.gz
 We also provide all of our test set predictions.
 These were utilized to calculate coefficient of determinations.
 These test set predictions were utilized with the [results/calc_r2_scores.ipynb](https://github.com/francoep/ImputationPaper/blob/master/results/calc_r2_scores.ipynb) file to calculate the coefficients of determination for each model trained.
+These coefficients of determination are the `*.r2.results` files in each directory of [results](https://github.com/francoep/ImputationPaper/blob/master/results/)
 
 ```
 cd results
